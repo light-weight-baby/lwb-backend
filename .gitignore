@@ -11,6 +11,9 @@
 # production
 /build
 
+# Keep environment variables out of version control
+.env
+
 # misc
 .DS_Store
 .env.local
