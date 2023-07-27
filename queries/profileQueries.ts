@@ -1,49 +1,28 @@
 import { prisma } from "../index";
 
-export async function getProfileById(id: number) {
+export async function getProfileById(id: string) {
   const userProfile = await prisma.user.findUniqueOrThrow({
     where: {
       id,
     },
     select: {
       id: true,
-      username: true,
-      usernameSet: true,
-      paymentType: true,
+      name: true,
       email: true,
-      picture: true,
+      age: true,
+      gender: true,
+      pictureUrl: true,
       registeredWith: true,
-
-      friends: {
-        select: {
-          id: true,
-          username: true,
-          picture: true,
-        },
-      },
-      friendRequests: {
-        select: {
-          id: true,
-          username: true,
-          picture: true,
-        },
-      },
-      friendRequestsSent: {
-        select: {
-          id: true,
-          username: true,
-          picture: true,
-        },
-      },
-      friendOf: {
-        select: {
-          id: true,
-          username: true,
-          picture: true,
-        },
-      },
-      events: true,
-      ownedEvents: true,
+      weightLb: true,
+      heightFoot: true,
+      heightInch: true,
+      squatLb: true,
+      deadLiftLb: true,
+      benchPressLb: true,
+      workoutPattern: true,
+      archetype: true,
+      yoe: true,
+      partners: true,
     },
   });
   if (userProfile) {
@@ -54,58 +33,11 @@ export async function getProfileById(id: number) {
   }
 }
 
-export async function getProfileByUsername(username: string) {
-  try {
-    const userProfile = await prisma.user.findUnique({
-      where: {
-        username,
-      },
-      include: {
-        friends: {
-          select: {
-            id: true,
-            username: true,
-            picture: true,
-          },
-        },
-        friendRequests: {
-          select: {
-            id: true,
-            username: true,
-            picture: true,
-          },
-        },
-        friendRequestsSent: {
-          select: {
-            id: true,
-            username: true,
-            picture: true,
-          },
-        },
-        friendOf: {
-          select: {
-            id: true,
-            username: true,
-            picture: true,
-          },
-        },
-        events: true,
-        ownedEvents: true,
-      },
-    });
-    if (userProfile) {
-      return userProfile;
-    }
-  } catch (e) {
-    console.log(e);
-  }
-}
-
 export async function getProfilesByPartialUsername(partialUsername: string) {
   try {
     const userProfiles = await prisma.user.findMany({
       where: {
-        username: {
+        name: {
           contains: partialUsername,
           mode: "insensitive",
         },

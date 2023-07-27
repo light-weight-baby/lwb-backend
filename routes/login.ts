@@ -1,6 +1,5 @@
 import { Router } from "express";
 import {
-  createUser,
   updateUserPassword,
   updateUserResetToken,
   validateUserResetToken,
@@ -8,11 +7,7 @@ import {
 import { OAuth2Client } from "google-auth-library";
 import bcrypt from "bcryptjs";
 import passport from "passport";
-import {
-  getProfileByEmail,
-  getProfileById,
-  getProfileByUsername,
-} from "../queries/profileQueries";
+import { getProfileByEmail, getProfileById } from "../queries/profileQueries";
 import dotenv from "dotenv";
 dotenv.config();
 import sgMail from "@sendgrid/mail";
@@ -21,9 +16,9 @@ sgMail.setApiKey(process.env.SENDGRID_API as string);
 const client = new OAuth2Client(process.env.CLIENTID);
 const router = Router();
 
-router.get("/", async (req:any, res:any) => {
+router.get("/", async (req: any, res: any) => {
   if (req.session.user) {
-    const user = await getProfileById(Number(req.session.user));
+    const user = await getProfileById(req.session.user);
 
     return res.status(200).json({ message: "Good to go!", user });
   } else {
@@ -31,7 +26,7 @@ router.get("/", async (req:any, res:any) => {
   }
 });
 
-router.post("/", async (req:any, res:any, next) => {
+router.post("/", async (req: any, res: any, next) => {
   passport.authenticate("local", (err: Error, user: any) => {
     if (err) {
       return next(err);
@@ -39,12 +34,12 @@ router.post("/", async (req:any, res:any, next) => {
     if (!user) {
       return res.status(401).json({ message: "This user does not exist!" });
     }
-    req.logIn(user, async (err:any) => {
+    req.logIn(user, async (err: any) => {
       if (err) {
         return next(err);
       }
       req.session.user = user.id.toString();
-      const userAccount = await getProfileById(Number(req.session.user));
+      const userAccount = await getProfileById(req.session.user);
       return res
         .status(200)
         .json({ message: `${user.username} has logged in`, user: userAccount });
@@ -52,7 +47,7 @@ router.post("/", async (req:any, res:any, next) => {
   })(req, res, next);
 });
 
-router.post("/googleOauth", async (req:any, res:any, next) => {
+router.post("/googleOauth", async (req: any, res: any, next) => {
   if (req.body.credential) {
     try {
       const token = req.body.credential;
@@ -63,12 +58,11 @@ router.post("/googleOauth", async (req:any, res:any, next) => {
           audience: process.env.CLIENTID,
         });
         payload = ticket.getPayload();
-        const userid = payload["sub"];
       }
       verify().then(async () => {
         const email = payload.email;
-        const picture = payload.picture;
-        const sub = payload.sub;
+        // const picture = payload.picture;
+        // const sub = payload.sub;
 
         const emailExists = await getProfileByEmail(email);
 
@@ -78,13 +72,13 @@ router.post("/googleOauth", async (req:any, res:any, next) => {
 
         const user: any = await getProfileByEmail(email);
 
-        req.logIn(user, async (err:any) => {
+        req.logIn(user, async (err: any) => {
           if (err) {
             return next(err);
           }
 
           req.session.user = user.id.toString();
-          const userAccount = await getProfileById(Number(req.session.user));
+          const userAccount = await getProfileById(req.session.user);
           return res
             .status(200)
             .json({ message: `${email} has logged in`, user: userAccount });
@@ -99,24 +93,16 @@ router.post("/googleOauth", async (req:any, res:any, next) => {
   }
 });
 
-router.post("/forgot", async (req:any, res:any) => {
-  const usernameOrEmail = req.body.usernameEmail;
-  let regex = new RegExp("[a-z0-9]+@[a-z]+.[a-z]{2,3}");
-  let user;
-  const isInputEmail = regex.test(usernameOrEmail);
-
-  if (!isInputEmail) {
-    user = await getProfileByUsername(usernameOrEmail);
-  } else {
-    user = await getProfileByEmail(usernameOrEmail);
-  }
+router.post("/forgot", async (req: any, res: any) => {
+  const email = req.body.email;
+  const user = await getProfileByEmail(email);
 
   if (user !== null && user && user.registeredWith !== "google") {
     const resetToken = Math.floor(100000000 + Math.random() * 900000000);
-    await updateUserResetToken(Number(user.id), resetToken.toString());
+    await updateUserResetToken(user.id, resetToken.toString());
     const msg = {
       to: `${user.email}`,
-      from: "crowdwrap@gmail.com",
+      from: "lwb@gmail.com",
       subject: "Password Reset",
       text: `Hi, your password reset token is ${resetToken}. It will last for 5 minutes!`,
     };
@@ -132,40 +118,35 @@ router.post("/forgot", async (req:any, res:any) => {
   return res.status(200).json({ message: "Good to go!" });
 });
 
-router.post("/forgot/check", async (req:any, res:any) => {
-  const usernameOrEmail = req.body.usernameEmail;
+router.post("/forgot/check", async (req: any, res: any) => {
+  const email = req.body.email;
   const token = req.body.token;
-  let regex = new RegExp("[a-z0-9]+@[a-z]+.[a-z]{2,3}");
-  let user;
-  const isInputEmail = regex.test(usernameOrEmail);
+  const regex = new RegExp("[a-z0-9]+@[a-z]+.[a-z]{2,3}");
 
-  if (!isInputEmail) {
-    user = await getProfileByUsername(usernameOrEmail);
-  } else {
-    user = await getProfileByEmail(usernameOrEmail);
+  if (!regex.test(email)) {
+    return res.status(400).json({ valid: false });
   }
 
+  const user = await getProfileByEmail(email);
+
   if (user !== null && user) {
-    const validation = await validateUserResetToken(Number(user.id), token);
+    const validation = await validateUserResetToken(user.id, token);
     console.log(validation);
     return res.status(200).json({ valid: validation });
   }
   return res.status(400).json({ valid: false });
 });
 
-router.post("/forgot/update", async (req:any, res:any) => {
-  const usernameOrEmail = req.body.usernameEmail;
+router.post("/forgot/update", async (req: any, res: any) => {
+  const email = req.body.email;
   const password: string = req.body.password;
+  const regex = new RegExp("[a-z0-9]+@[a-z]+.[a-z]{2,3}");
 
-  let regex = new RegExp("[a-z0-9]+@[a-z]+.[a-z]{2,3}");
-  let user;
-  const isInputEmail = regex.test(usernameOrEmail);
-
-  if (!isInputEmail) {
-    user = await getProfileByUsername(usernameOrEmail);
-  } else {
-    user = await getProfileByEmail(usernameOrEmail);
+  if (!regex.test(email)) {
+    return res.status(400).json({ message: "Not an email!" });
   }
+
+  const user = await getProfileByEmail(email);
 
   if (user !== null && user) {
     if (!password || password.length < 8 || password.length > 20) {
@@ -174,7 +155,7 @@ router.post("/forgot/update", async (req:any, res:any) => {
 
     const hashedPass = await bcrypt.hash(password, 10);
 
-    const updatedUser = await updateUserPassword(Number(user.id), hashedPass);
+    await updateUserPassword(user.id, hashedPass);
     return res.status(200).json({ message: "Password Changed!" });
   } else {
     return res.status(400).json({ message: "Invalid User!" });

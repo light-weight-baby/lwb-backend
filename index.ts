@@ -7,11 +7,7 @@ declare module "express-session" {
     id: string;
   }
 }
-import {
-  getProfileByUsername,
-  getProfileByEmail,
-  getProfileById,
-} from "./queries/profileQueries";
+import { getProfileByEmail, getProfileById } from "./queries/profileQueries";
 import cors from "cors";
 import passport from "passport";
 import http from "http";
@@ -24,9 +20,7 @@ import registerRouter from "./routes/register";
 import loginRouter from "./routes/login";
 import logoutRouter from "./routes/logout";
 import profileRouter from "./routes/profile";
-import friendsRouter from "./routes/friends";
-import eventsRouter from "./routes/events";
-import paymentRouter from "./routes/payment";
+import partnersRouter from "./routes/partners";
 const morgan = require("morgan");
 
 export const app = express();
@@ -54,13 +48,7 @@ app.use(passport.initialize());
 app.use(passport.session());
 app.use(morgan("dev"));
 
-
-intializePassport(
-  passport,
-  getProfileByUsername,
-  getProfileById,
-  getProfileByEmail
-);
+intializePassport(passport, getProfileById, getProfileByEmail);
 
 const server = http.createServer(app);
 
@@ -78,6 +66,7 @@ io.use((socket: any, next: any) => {
 
 export let onlineUsers: any = {};
 
+// @TODO: cache "onlineUsers"
 io.on("connection", async (socket: any) => {
   console.log("User Connected", socket.id);
   try {
@@ -103,7 +92,6 @@ io.on("connection", async (socket: any) => {
   });
 });
 
-
 app.use("/register", registerRouter);
 
 app.use("/login", loginRouter);
@@ -112,11 +100,7 @@ app.use("/logout", logoutRouter);
 
 app.use("/profile", profileRouter);
 
-app.use("/friends", friendsRouter);
-
-app.use("/events", eventsRouter);
-
-app.use("/payment", paymentRouter);
+app.use("/partners", partnersRouter);
 
 server.listen(process.env.PORT || 8000, () => {
   console.log(`Server is listening `);

@@ -1,0 +1,12 @@
+-- CreateEnum
+CREATE TYPE "Gender" AS ENUM ('MALE', 'FEMALE', 'OTHER');
+
+-- AlterTable
+ALTER TABLE "User" ADD COLUMN     "age" INTEGER,
+ADD COLUMN     "gender" "Gender",
+ALTER COLUMN "weightLb" DROP NOT NULL,
+ALTER COLUMN "heightFoot" DROP NOT NULL,
+ALTER COLUMN "heightInch" DROP NOT NULL,
+ALTER COLUMN "archetype" DROP NOT NULL,
+ALTER COLUMN "yoe" DROP NOT NULL,
+ALTER COLUMN "partners" SET DEFAULT ARRAY[]::TEXT[];
