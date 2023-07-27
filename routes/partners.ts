@@ -15,8 +15,8 @@ const router = Router();
 
 router.get("/", async (req: any, res: any) => {
   let partnerAccounts;
-  if (req.session.user) {
-    const user = await getProfileById(req.session.user);
+  if (req.session.userId) {
+    const user = await getProfileById(req.session.userId);
     const partners = user.partners;
 
     if (partners) {
@@ -42,7 +42,7 @@ router.get("/", async (req: any, res: any) => {
 
 router.get("/list-search", async (req: any, res: any) => {
   const userSearch: any = req.query.user_search;
-  const user = await getProfileById(req.session.user);
+  const user = await getProfileById(req.session.userId);
   const searchedPartners = await getPartnersByPartialUsername(
     userSearch,
     user.id

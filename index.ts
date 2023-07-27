@@ -11,7 +11,7 @@ import { getProfileByEmail, getProfileById } from "./queries/profileQueries";
 import cors from "cors";
 import passport from "passport";
 import http from "http";
-import { Server } from "socket.io";
+//import { Server } from "socket.io";
 import intializePassport from "./passport";
 import { PrismaSessionStore } from "@quixo3/prisma-session-store";
 import { PrismaClient } from "@prisma/client";
@@ -74,11 +74,11 @@ io.on("connection", async (socket: any) => {
   try {
     let session = socket.request.session;
 
-    session.userId = session.user;
+    session.userId = session.userId;
     session.socketId = socket.id;
     session.status = "online";
 
-    onlineUsers[session.user] = [socket.id, session.status];
+    onlineUsers[session.userId] = [socket.id, session.status];
     await session.save();
   } catch (e) {
     throw e;
@@ -88,7 +88,7 @@ io.on("connection", async (socket: any) => {
     console.log("User Disconnected", socket.id);
     let session = socket.request.session;
     session.status = "offline";
-    onlineUsers[session.user] = [socket.id, session.status];
+    onlineUsers[session.userId] = [socket.id, session.status];
   });
 });
 */

@@ -5,8 +5,8 @@ const router = Router();
 import bcrypt from "bcryptjs";
 
 router.get("/", async (req: any, res: any) => {
-  if (req.session.user) {
-    const user = await getProfileById(req.session.user);
+  if (req.session.userId) {
+    const user = await getProfileById(req.session.userId);
     res.setHeader("Content-Type", "application/json");
     return res.status(200).json({ user });
   } else {
@@ -15,10 +15,10 @@ router.get("/", async (req: any, res: any) => {
 });
 
 router.post("/password/update", async (req: any, res: any, next: any) => {
-  if (req.session.user) {
+  if (req.session.userId) {
     const oldPassword: string = req.body.oldPassword;
     const newPassword: string = req.body.newPassword;
-    const tempUser = await getProfileById(req.session.user);
+    const tempUser = await getProfileById(req.session.userId);
     const user: any = await getProfileByEmail(tempUser.email);
     if (user) {
       bcrypt.compare(
@@ -38,7 +38,7 @@ router.post("/password/update", async (req: any, res: any, next: any) => {
 
             const hashedPass = await bcrypt.hash(newPassword, 10);
 
-            await updateUserPassword(req.session.user, hashedPass);
+            await updateUserPassword(req.session.userId, hashedPass);
             return res.status(200).json({ message: "Password Changed!" });
           } else {
             return res

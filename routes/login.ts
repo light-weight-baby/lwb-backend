@@ -17,8 +17,8 @@ const client = new OAuth2Client(process.env.CLIENTID);
 const router = Router();
 
 router.get("/", async (req: any, res: any) => {
-  if (req.session.user) {
-    const user = await getProfileById(req.session.user);
+  if (req.session.userId) {
+    const user = await getProfileById(req.session.userId);
 
     return res.status(200).json({ message: "Good to go!", user });
   } else {
@@ -38,8 +38,8 @@ router.post("/", async (req: any, res: any, next) => {
       if (err) {
         return next(err);
       }
-      req.session.user = user.id.toString();
-      const userAccount = await getProfileById(req.session.user);
+      req.session.userId = user.id;
+      const userAccount = await getProfileById(req.session.userId);
       return res
         .status(200)
         .json({ message: `${user.username} has logged in`, user: userAccount });
@@ -77,8 +77,8 @@ router.post("/googleOauth", async (req: any, res: any, next) => {
             return next(err);
           }
 
-          req.session.user = user.id.toString();
-          const userAccount = await getProfileById(req.session.user);
+          req.session.userId = user.id;
+          const userAccount = await getProfileById(req.session.userId);
           return res
             .status(200)
             .json({ message: `${email} has logged in`, user: userAccount });
