@@ -52,6 +52,8 @@ intializePassport(passport, getProfileById, getProfileByEmail);
 
 const server = http.createServer(app);
 
+// @TODO: cache and uncomment when needed
+/*
 export const io = new Server(server, {
   pingTimeout: 60000,
   cors: {
@@ -66,7 +68,7 @@ io.use((socket: any, next: any) => {
 
 export let onlineUsers: any = {};
 
-// @TODO: cache "onlineUsers"
+
 io.on("connection", async (socket: any) => {
   console.log("User Connected", socket.id);
   try {
@@ -77,7 +79,6 @@ io.on("connection", async (socket: any) => {
     session.status = "online";
 
     onlineUsers[session.user] = [socket.id, session.status];
-    console.log(onlineUsers);
     await session.save();
   } catch (e) {
     throw e;
@@ -88,9 +89,9 @@ io.on("connection", async (socket: any) => {
     let session = socket.request.session;
     session.status = "offline";
     onlineUsers[session.user] = [socket.id, session.status];
-    console.log(onlineUsers);
   });
 });
+*/
 
 app.use("/register", registerRouter);
 

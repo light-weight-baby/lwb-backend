@@ -1,5 +1,5 @@
 import { Router } from "express";
-import { onlineUsers } from "../index";
+//import { onlineUsers } from "../index";
 import {
   addPartner,
   removePartner,
@@ -21,16 +21,16 @@ router.get("/", async (req: any, res: any) => {
 
     if (partners) {
       partnerAccounts = partners.map((partner) => {
-        let isOnline = "offline";
-        if (onlineUsers[partner.id] && onlineUsers[partner.id][1] == "online") {
-          isOnline = "online";
-        }
+        // let isOnline = "offline";
+        // if (onlineUsers[partner.id] && onlineUsers[partner.id][1] == "online") {
+        //   isOnline = "online";
+        // }
 
         return {
           username: partner.name,
           profilePic: partner.pictureUrl,
           userId: partner.id,
-          status: isOnline,
+          // status: isOnline,
         };
       });
     }

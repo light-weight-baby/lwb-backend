@@ -8,20 +8,19 @@ export default function intializePassport(
   getProfileByEmail: any
 ) {
   const authenticateUser = async (
-    username: string,
-    // email: string,
+    email: string,
     password: string,
     done: any
   ) => {
     const regex = new RegExp("[a-z0-9]+@[a-z]+.[a-z]{2,3}");
 
-    if (!regex.test(username)) {
+    if (!regex.test(email)) {
       return done(null, false, {
         message: "Not an email, please try again",
       });
     }
 
-    const user = await getProfileByEmail(username);
+    const user = await getProfileByEmail(email);
 
     if (user == null) {
       return done(null, false, {
