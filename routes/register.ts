@@ -1,11 +1,11 @@
-import { Router } from "express";
+import {router} from "../loaders/express"
 import { createUser, updateUser, updateUserName } from "../queries/userQueries";
 import { OAuth2Client } from "google-auth-library";
 import bcrypt from "bcryptjs";
 import { getProfileByEmail } from "../queries/profileQueries";
 
 const client = new OAuth2Client(process.env.CLIENTID);
-const router = Router();
+
 
 router.post("/", async (req: any, res: any) => {
   try {

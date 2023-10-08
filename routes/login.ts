@@ -1,4 +1,4 @@
-import { Router } from "express";
+import {router} from "../loaders/express"
 import {
   updateUserPassword,
   updateUserResetToken,
@@ -14,7 +14,6 @@ import sgMail from "@sendgrid/mail";
 sgMail.setApiKey(process.env.SENDGRID_API as string);
 
 const client = new OAuth2Client(process.env.CLIENTID);
-const router = Router();
 
 router.get("/", async (req: any, res: any) => {
   if (req.session.userId) {

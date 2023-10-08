@@ -1,7 +1,6 @@
-import { Router } from "express";
+import {router} from "../loaders/express"
 import { getProfileByEmail, getProfileById } from "../queries/profileQueries";
 import { updateUserPassword } from "../queries/userQueries";
-const router = Router();
 import bcrypt from "bcryptjs";
 
 router.get("/", async (req: any, res: any) => {

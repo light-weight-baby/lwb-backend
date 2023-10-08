@@ -1,12 +1,10 @@
-import { Router } from "express";
-//import { onlineUsers } from "../index";
+import {router} from "../loaders/express"
 import {
   addPartner,
   removePartner,
   getPartnersByPartialUsername,
 } from "../queries/partnerQueries";
 import { getProfileById } from "../queries/profileQueries";
-const router = Router();
 
 router.get("/", async (req: any, res: any) => {
   let partnerAccounts;

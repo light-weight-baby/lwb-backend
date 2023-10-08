@@ -1,5 +1,4 @@
-import { Router } from "express";
-const router = Router();
+import {router} from "../loaders/express"
 
 router.get("/", (req:any, res:any) => {
   req.logout(function (err:any) {
