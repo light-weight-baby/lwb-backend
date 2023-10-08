@@ -1,12 +1,10 @@
-import { Router } from "express";
-//import { onlineUsers } from "../index";
+import {router} from "../loaders/express"
 import {
   addPartner,
   removePartner,
   getPartnersByPartialUsername,
 } from "../queries/partnerQueries";
 import { getProfileById } from "../queries/profileQueries";
-const router = Router();
 
 router.get("/", async (req: any, res: any) => {
   let partnerAccounts;
@@ -15,7 +13,7 @@ router.get("/", async (req: any, res: any) => {
     const partners = user.partners;
 
     if (partners) {
-      partnerAccounts = partners.map((partner) => {
+      partnerAccounts = partners.map((partner:any) => {
         // let isOnline = "offline";
         // if (onlineUsers[partner.id] && onlineUsers[partner.id][1] == "online") {
         //   isOnline = "online";
