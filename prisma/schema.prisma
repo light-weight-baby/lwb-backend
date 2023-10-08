@@ -11,92 +11,83 @@ datasource db {
 }
 
 model User {
-  id             Int      @id @default(autoincrement())
-  username       String   @unique
-  email          String   @unique
-  password       String
-  picture        String
+  id       String @id @default(uuid())
+  email    String @unique
+  name     String
+  password String
+
+  age            Int?
+  gender         Gender?
+  weightLb       Int?
+  heightFoot     Int?
+  heightInch     Int?
+  squatLb        Int?
+  deadLiftLb     Int?
+  benchPressLb   Int?
+  workoutPattern Json?
+  archetype      Archetype?
+  yoe            Int?
+
+  pictureUrl     String?
   session        Session?
   registeredWith String?
-  usernameSet    Boolean  @default(false)
-  paymentType    String   @default("")
 
-  friends  User[] @relation("Friend", map: "UserFriends")
-  friendOf User[] @relation("Friend")
-
-  friendRequests     User[] @relation("FriendRequests", map: "UserFriendRequests")
-  friendRequestsSent User[] @relation("FriendRequests")
-
-  events EventToUser[]
-
-  ownedEvents Event[]   @relation("OwnedEvents")
-  Message     Message[]
-  Posts       Posts[]
+  partners  User[]    @relation("Partner", map: "UserPartners")
+  partnerOf User[]    @relation("Partner")
+  workouts  Workout[]
+  // messages Message[]
 
   resetToken           String?
   resetTokenExpiration DateTime?
 }
 
-model Event {
-  id           Int           @id @default(autoincrement())
-  title        String
-  description  String?
-  deadlineDate String
-  inviteLink   String        @unique
-  image        String?
-  gifts        String?
-  mode         String?
-  createdAt    DateTime      @default(now())
-  //more for specific things needed
-  Currentfunds Float
-  moneyGoal    String
-  published    Boolean       @default(false)
-  participants EventToUser[]
-  owner        User          @relation("OwnedEvents", fields: [ownerId], references: [id])
-  ownerId      Int
-
-  Message Message[]
+model Gym {
+  id       String @id @default(uuid())
+  location Int[]  @unique
+  name     String
 }
 
-model EventToUser {
-  id           Int      @id @default(autoincrement())
-  user         User     @relation(fields: [userId], references: [id])
-  userId       Int
-  event        Event    @relation(fields: [eventId], references: [id], onDelete: Cascade)
-  eventId      Int
-  picture      String?
-  joinedAt     DateTime @default(now())
-  username     String?
-  currentMoney Float?
-
-  @@unique([userId, eventId])
+model Workout {
+  id       String       @id @default(uuid())
+  partners User[] // currently only support 2. @TODO: support group meetups
+  datetime DateTime
+  status   MeetupStatus
+  type     WorkoutType
+  location Int[]        @unique
+  rating   Int
 }
 
 model Session {
   id        String   @id
   sid       String   @unique
   data      String
-  userId    Int?     @unique
+  userId    String?  @unique
   user      User?    @relation(fields: [userId], references: [id])
   socketId  String?  @unique
   expiresAt DateTime
 }
 
-model Message {
-  id        Int      @id @default(autoincrement())
-  content   String
-  createdAt DateTime @default(now())
-  userId    Int
-  user      User     @relation(fields: [userId], references: [id])
-  eventId   Int
-  event     Event    @relation(fields: [eventId], references: [id])
+enum MeetupStatus {
+  SCHEDULED
+  IN_PROGRESS
+  DONE
+  RATED
 }
 
-model Posts {
-  id        Int      @id @default(autoincrement())
-  content   String
-  createdAt DateTime @default(now())
-  userId    Int
-  user      User     @relation(fields: [userId], references: [id])
-  public    Boolean  @default(false)
+enum WorkoutType {
+  GYM // currently only support gym lifting. @TODO add additional workout support
+}
+
+enum Archetype {
+  POWER_LIFTER
+  BODY_BUILDER
+  CALISTHENIC
+  ATHELETIC // train for sports (not MVP)
+  // HIIT // high intensity like cross-fit (not MVP)
+}
+
+enum Gender {
+  MALE
+  FEMALE
+  OTHER
 }

@@ -5,34 +5,19 @@ export async function createUser(
   username: string,
   email: string,
   password: string,
-  registeredWith: string,
-  usernameSet: boolean
+  registeredWith: string
 ) {
   try {
-    const user = await prisma.user.create({
+    await prisma.user.create({
       data: {
-        username,
+        name: username,
         email,
         password,
         registeredWith,
-        usernameSet,
-        picture:
+        pictureUrl:
           "https://vectorified.com/images/no-profile-picture-icon-28.png",
-        friends: {
-          connect: [],
-        },
-        friendRequests: {
-          connect: [],
-        },
-        ownedEvents: {
-          create: [],
-        },
-        events: {
-          create: [],
-        },
       },
     });
-
   } catch (error) {
     console.error("create user error", error);
     throw new Error(
@@ -46,7 +31,7 @@ export async function updateUser(email: string, newPic: string) {
 
   const updatedUser = await prisma.user.update({
     where: { id: user.id },
-    data: { picture: newPic },
+    data: { pictureUrl: newPic },
   });
 
   return updatedUser;
@@ -57,62 +42,13 @@ export async function updateUserName(email: string, newUsername: string) {
 
   const updatedUser = await prisma.user.update({
     where: { id: user.id },
-    data: { username: newUsername },
+    data: { name: newUsername },
   });
 
   return updatedUser;
 }
 
-export async function updateUserUsernameSet(
-  userId: number,
-  usernameSet: boolean
-) {
-  const updatedUser = await prisma.user.update({
-    where: { id: userId },
-    data: { usernameSet },
-  });
-
-  return updatedUser;
-}
-
-export async function updateEventToUserUsername(
-  userId: number,
-  newUsername: string
-) {
-  const updatedUser = await prisma.eventToUser.updateMany({
-    where: { userId },
-    data: { username: newUsername },
-  });
-
-  return updatedUser;
-}
-
-export async function updateUserCurrentFunds(
-  eventId: number,
-  userId: number,
-  currentMoney: number
-) {
-  const user: any = await prisma.eventToUser.findFirst({
-    where: {
-      userId,
-      eventId,
-    },
-  });
-
-  if (user) {
-    const updateFunds = await prisma.eventToUser.update({
-      where: { id: user?.id },
-      data: {
-        currentMoney: user?.currentMoney + currentMoney,
-      },
-    });
-    return updateFunds;
-  } else {
-    throw new Error(`User ${userId} is not a participant in event ${eventId}`);
-  }
-}
-
-export async function updateUserPassword(id: number, password: string) {
+export async function updateUserPassword(id: string, password: string) {
   const user = await prisma.user.update({
     where: { id },
     data: {
@@ -122,7 +58,7 @@ export async function updateUserPassword(id: number, password: string) {
   return user;
 }
 
-export async function updateUserResetToken(id: number, token: string) {
+export async function updateUserResetToken(id: string, token: string) {
   const expirationDate = new Date(Date.now() + 5 * 60 * 1000);
   const user = await prisma.user.update({
     where: { id },
@@ -134,7 +70,7 @@ export async function updateUserResetToken(id: number, token: string) {
   return user;
 }
 
-export async function validateUserResetToken(id: number, token: string) {
+export async function validateUserResetToken(id: string, token: string) {
   const user: any = await prisma.user.findUnique({
     where: { id },
   });

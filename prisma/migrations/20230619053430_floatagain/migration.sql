@@ -1,2 +1,0 @@
--- AlterTable
-ALTER TABLE "Event" ALTER COLUMN "Currentfunds" SET DATA TYPE DOUBLE PRECISION;

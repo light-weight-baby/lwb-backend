@@ -4,25 +4,23 @@ import { User } from "@prisma/client";
 
 export default function intializePassport(
   passport: any,
-  getProfileByUsername: any,
   getProfileById: Function,
   getProfileByEmail: any
 ) {
   const authenticateUser = async (
-    username: string,
-    // email: string,
+    email: string,
     password: string,
     done: any
   ) => {
-    let user;
-    let regex = new RegExp("[a-z0-9]+@[a-z]+.[a-z]{2,3}");
-    const isInputEmail = regex.test(username);
+    const regex = new RegExp("[a-z0-9]+@[a-z]+.[a-z]{2,3}");
 
-    if (!isInputEmail) {
-      user = await getProfileByUsername(username);
-    } else {
-      user = await getProfileByEmail(username);
+    if (!regex.test(email)) {
+      return done(null, false, {
+        message: "Not an email, please try again",
+      });
     }
+
+    const user = await getProfileByEmail(email);
 
     if (user == null) {
       return done(null, false, {

@@ -2,15 +2,12 @@ import { Router } from "express";
 import { createUser, updateUser, updateUserName } from "../queries/userQueries";
 import { OAuth2Client } from "google-auth-library";
 import bcrypt from "bcryptjs";
-import {
-  getProfileByEmail,
-  getProfileByUsername,
-} from "../queries/profileQueries";
+import { getProfileByEmail } from "../queries/profileQueries";
 
 const client = new OAuth2Client(process.env.CLIENTID);
 const router = Router();
 
-router.post("/", async (req:any, res:any) => {
+router.post("/", async (req: any, res: any) => {
   try {
     const { username, email, password } = req.body;
 
@@ -28,9 +25,8 @@ router.post("/", async (req:any, res:any) => {
 
     //makes sure that the user doesnt exist
     const emailExists = await getProfileByEmail(email);
-    const usernameExists = await getProfileByUsername(username);
 
-    if (emailExists || usernameExists) {
+    if (emailExists) {
       return res
         .status(400)
         .json({ message: "This user exists, please login!" });
@@ -40,7 +36,7 @@ router.post("/", async (req:any, res:any) => {
     const hashedPass = await bcrypt.hash(password, 10);
 
     //Create user and send to DB
-    createUser(username, email, hashedPass, "local", true);
+    createUser(username, email, hashedPass, "local");
     return res.status(201).json({ message: `${username} has been created` });
   } catch (e) {
     console.log("Registration Error:", e);
@@ -48,7 +44,7 @@ router.post("/", async (req:any, res:any) => {
   }
 });
 
-router.post("/googleOauth", async (req:any, res:any) => {
+router.post("/googleOauth", async (req: any, res: any) => {
   if (req.body.credential) {
     try {
       const token = req.body.credential;
@@ -59,7 +55,6 @@ router.post("/googleOauth", async (req:any, res:any) => {
           audience: process.env.CLIENTID,
         });
         payload = ticket.getPayload();
-        const userid = payload["sub"];
       }
       verify()
         .then(async () => {
@@ -74,7 +69,7 @@ router.post("/googleOauth", async (req:any, res:any) => {
               .json({ message: "This user exists, please login!" });
           }
 
-          createUser(userData, email, "", "google", false);
+          createUser(userData, email, "", "google");
           if (picture) {
             updateUser(email, picture);
           }
