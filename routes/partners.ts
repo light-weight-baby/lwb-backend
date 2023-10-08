@@ -13,7 +13,7 @@ router.get("/", async (req: any, res: any) => {
     const partners = user.partners;
 
     if (partners) {
-      partnerAccounts = partners.map((partner) => {
+      partnerAccounts = partners.map((partner:any) => {
         // let isOnline = "offline";
         // if (onlineUsers[partner.id] && onlineUsers[partner.id][1] == "online") {
         //   isOnline = "online";

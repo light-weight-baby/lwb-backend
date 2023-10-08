@@ -1,30 +1,22 @@
 import dotenv from "dotenv";
-dotenv.config();
+
 import express from "express";
-declare module "express-session" {
-  interface Session {
-    user: string;
-    id: string;
-  }
-}
 import { getProfileByEmail, getProfileById } from "./queries/profileQueries";
 import cors from "cors";
 import passport from "passport";
-import http from "http";
-//import { Server } from "socket.io";
-import intializePassport from "./passport";
+import intializePassport from "./services/passport";
 import { PrismaSessionStore } from "@quixo3/prisma-session-store";
-import { PrismaClient } from "@prisma/client";
+import {prisma} from "./loaders/prisma"
 import expressSession from "express-session";
 import registerRouter from "./routes/register";
 import loginRouter from "./routes/login";
 import logoutRouter from "./routes/logout";
 import profileRouter from "./routes/profile";
 import partnersRouter from "./routes/partners";
-const morgan = require("morgan");
 
+const morgan = require("morgan");
+dotenv.config();
 export const app = express();
-export const prisma = new PrismaClient();
 
 const sessionMiddleware = expressSession({
   cookie: { maxAge: 24 * 60 * 60 * 1000 }, //24 hour
@@ -50,59 +42,16 @@ app.use(morgan("dev"));
 
 intializePassport(passport, getProfileById, getProfileByEmail);
 
-const server = http.createServer(app);
+app.use("/api/register", registerRouter);
 
-// @TODO: cache and uncomment when needed
-/*
-export const io = new Server(server, {
-  pingTimeout: 60000,
-  cors: {
-    origin: "http://localhost:3001/",
-    credentials: true,
-  },
-});
+app.use("/api/login", loginRouter);
 
-io.use((socket: any, next: any) => {
-  sessionMiddleware(socket.request, socket.request.res || {}, next);
-});
+app.use("/api/logout", logoutRouter);
 
-export let onlineUsers: any = {};
+app.use("/api/profile", profileRouter);
 
+app.use("/api/partners", partnersRouter);
 
-io.on("connection", async (socket: any) => {
-  console.log("User Connected", socket.id);
-  try {
-    let session = socket.request.session;
-
-    session.userId = session.userId;
-    session.socketId = socket.id;
-    session.status = "online";
-
-    onlineUsers[session.userId] = [socket.id, session.status];
-    await session.save();
-  } catch (e) {
-    throw e;
-  }
-
-  socket.on("disconnect", async () => {
-    console.log("User Disconnected", socket.id);
-    let session = socket.request.session;
-    session.status = "offline";
-    onlineUsers[session.userId] = [socket.id, session.status];
-  });
-});
-*/
-
-app.use("/register", registerRouter);
-
-app.use("/login", loginRouter);
-
-app.use("/logout", logoutRouter);
-
-app.use("/profile", profileRouter);
-
-app.use("/partners", partnersRouter);
-
-server.listen(process.env.PORT || 8000, () => {
+app.listen(process.env.PORT || 8000, () => {
   console.log(`Server is listening `);
 });
