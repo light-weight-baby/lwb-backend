@@ -8,11 +8,6 @@ import {
 import { getProfileById } from "../queries/profileQueries";
 const router = Router();
 
-// A lot of scalablity problems with the friendlist, for example the notificatins. There would be a problem if there were too many active users (Redis could solve)
-// Another problem would be how friends are displayed, they are all. So if someone has 100s of friends their browser would likely crash trying to display
-// all of those. This can easily be fixed though by capping the shown amount, and having it lazy load.
-//Same problem when adding a friend, itll show every single user that that has letters that they are searching for, should probably cap it too
-
 router.get("/", async (req: any, res: any) => {
   let partnerAccounts;
   if (req.session.userId) {
