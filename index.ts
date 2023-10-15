@@ -1,5 +1,4 @@
 import dotenv from "dotenv";
-
 import express from "express";
 import { getProfileByEmail, getProfileById } from "./queries/profileQueries";
 import cors from "cors";
@@ -13,10 +12,11 @@ import loginRouter from "./routes/login";
 import logoutRouter from "./routes/logout";
 import profileRouter from "./routes/profile";
 import partnersRouter from "./routes/partners";
+import oauthRouter from "./routes/oauth";
 
 const morgan = require("morgan");
 dotenv.config();
-export const app = express();
+const app = express();
 
 const sessionMiddleware = expressSession({
   cookie: { maxAge: 24 * 60 * 60 * 1000 }, //24 hour
@@ -44,6 +44,8 @@ intializePassport(passport, getProfileById, getProfileByEmail);
 
 app.use("/api/register", registerRouter);
 
+app.use("/api/oauth", oauthRouter)
+
 app.use("/api/login", loginRouter);
 
 app.use("/api/logout", logoutRouter);
@@ -55,3 +57,5 @@ app.use("/api/partners", partnersRouter);
 app.listen(process.env.PORT || 8000, () => {
   console.log(`Server is listening `);
 });
+
+export {passport}
