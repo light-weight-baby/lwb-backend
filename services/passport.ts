@@ -1,8 +1,10 @@
 import { Strategy as LocalStrategy } from "passport-local";
+let GoogleStrategy = require('passport-google-oauth20').Strategy;
 import bcrypt from "bcryptjs";
 import { User } from "@prisma/client";
+import {prisma} from "../loaders/prisma"
 
-export default function intializePassport(
+export default function intializeLocalPassport(
   passport: any,
   getProfileById: Function,
   getProfileByEmail: any
@@ -40,9 +42,35 @@ export default function intializePassport(
     }
   };
 
+  
+
   passport.use(new LocalStrategy(authenticateUser));
   passport.serializeUser((user: User, done: any) => done(null, user.id));
   passport.deserializeUser((id: Number, done: any) => {
     return done(null, getProfileById(id));
   });
+
+  passport.use(new GoogleStrategy({
+    clientID: process.env.GOOGLE_CLIENTID,
+    clientSecret: process.env.GOOGLE_SECRET,
+    callbackURL: "/oauth/google/callback"
+    },
+    async (accessToken:string, refreshToken:string, profile:any, cb:Function) => {
+      try{
+        let user = await prisma.user.findUnique({
+          where: {
+            email: profile.email,
+          },
+        });
+        console.log(profile)
+        console.log(user)
+        return cb(user);
+      }catch(err){
+        console.error(err)
+      }
+
+    // User.findOrCreate({ googleId: profile.id }, function (err, user) {
+    //     return cb(err, user);
+    }
+));
 }
