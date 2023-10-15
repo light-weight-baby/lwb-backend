@@ -43,45 +43,47 @@ router.post("/", async (req: any, res: any) => {
   }
 });
 
-router.post("/googleOauth", async (req: any, res: any) => {
-  if (req.body.credential) {
-    try {
-      const token = req.body.credential;
-      let payload: any;
-      async function verify() {
-        const ticket = await client.verifyIdToken({
-          idToken: token,
-          audience: process.env.CLIENTID,
-        });
-        payload = ticket.getPayload();
-      }
-      verify()
-        .then(async () => {
-          const email = payload.email;
-          const picture = payload.picture;
-          const userData = payload.sub;
-          const emailExists = await getProfileByEmail(email);
+// router.post("/googleOauth", async (req: any, res: any) => {
+//   if (req.body.credential) {
+//     try {
+//       const token = req.body.credential;
+//       let payload: any;
+//       async function verify() {
+//         const ticket = await client.verifyIdToken({
+//           idToken: token,
+//           audience: process.env.CLIENTID,
+//         });
+//         payload = ticket.getPayload();
+//       }
+//       verify()
+//         .then(async () => {
+//           const email = payload.email;
+//           const picture = payload.picture;
+//           const userData = payload.sub;
+//           const emailExists = await getProfileByEmail(email);
 
-          if (emailExists) {
-            return res
-              .status(400)
-              .json({ message: "This user exists, please login!" });
-          }
+//           if (emailExists) {
+//             return res
+//               .status(400)
+//               .json({ message: "This user exists, please login!" });
+//           }
 
-          createUser(userData, email, "", "google");
-          if (picture) {
-            updateUser(email, picture);
-          }
-          return res.status(200).json({ message: `${email} has been created` });
-        })
-        .catch((e) => console.log("GoogleOauth error:", e));
-    } catch (e) {
-      console.log("GoogleOauth error:", e);
-      return res.status(401).json({ message: "Google Oauth Failed" });
-    }
-  } else {
-    return res.status(401).json({ message: "Google Oauth Failed" });
-  }
-});
+//           createUser(userData, email, "", "google");
+//           if (picture) {
+//             updateUser(email, picture);
+//           }
+//           return res.status(200).json({ message: `${email} has been created` });
+//         })
+//         .catch((e) => console.log("GoogleOauth error:", e));
+//     } catch (e) {
+//       console.log("GoogleOauth error:", e);
+//       return res.status(401).json({ message: "Google Oauth Failed" });
+//     }
+//   } else {
+//     return res.status(401).json({ message: "Google Oauth Failed" });
+//   }
+// });
+
+
 
 export default router;

@@ -6,7 +6,7 @@ import {
 } from "../queries/userQueries";
 import { OAuth2Client } from "google-auth-library";
 import bcrypt from "bcryptjs";
-import passport from "passport";
+import {passport} from "../index"
 import { getProfileByEmail, getProfileById } from "../queries/profileQueries";
 import dotenv from "dotenv";
 dotenv.config();
